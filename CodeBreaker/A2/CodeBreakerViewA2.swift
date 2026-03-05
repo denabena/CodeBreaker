@@ -36,7 +36,7 @@ struct CodeBreakerViewA2: View {
     var guessButton: some View {
         Button("Guess") {
             withAnimation {
-                if !game.guessCode.pegs.allSatisfy( { $0 == Code.missing }) && !game.attempts.contains(where: { $0.pegs == game.guessCode.pegs }) {
+                if !game.guessCode.pegs.allSatisfy( { $0 == Code.missingPeg }) && !game.attempts.contains(where: { $0.pegs == game.guessCode.pegs }) {
                     game.attemptGuess()
                 }
                 
@@ -62,7 +62,7 @@ struct CodeBreakerViewA2: View {
             ForEach(code.pegs.indices, id: \.self) { index in
                 RoundedRectangle(cornerRadius: 10)
                     .overlay {
-                        if code.pegs[index] == Code.missing {
+                        if code.pegs[index] == Code.missingPeg {
                             RoundedRectangle(cornerRadius: 10)
                                 .strokeBorder(Color.gray)
                         }
@@ -77,7 +77,7 @@ struct CodeBreakerViewA2: View {
                     }
                 
             }
-            MatchMarkersA2(matches: code.matches, circleCount: game.count)
+            //MatchMarkersA2(matches: code.matches, circleCount: game.count)
                 .overlay {
                     if code.kind == .guesscode {
                         guessButton

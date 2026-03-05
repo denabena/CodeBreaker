@@ -1,0 +1,79 @@
+//
+//  Code.swift
+//  CodeBreaker
+//
+//  Created by Marin Denić on 27.02.2026..
+//
+
+import SwiftUI
+
+struct Code {
+    
+    var kind: Kind
+    var pegs: [Peg]
+    
+    var matches: [Match]? {
+        switch kind {
+        case .attempt(let matches): return matches
+        default: return nil
+        }
+    
+    }
+    
+    var isHidden: Bool {
+        switch kind {
+        case .mastercode(let isHidden): return isHidden
+        default: return false
+        }
+    }
+    
+    init(kind: Kind = Kind.undefined, count: Int) {
+        self.kind = kind
+        self.pegs = Array.init(repeating: Code.missingPeg, count: count)
+    }
+    
+    static let missingPeg: Peg = .clear
+    
+    enum Kind: Equatable {
+        case mastercode (isHidden: Bool)
+        case guesscode
+        case attempt ([Match])
+        case undefined
+    }
+    
+    mutating func randomize(from pegChoices: [Peg]) {
+        for index in pegs.indices {
+            pegs[index] = pegChoices.randomElement() ?? Code.missingPeg
+        }
+    }
+    
+    mutating func reset() {
+        pegs = Array(repeating: Code.missingPeg, count: 4)
+    }
+    
+    func match(against otherCode: Code) -> [Match] {
+        var pegsToMatch = otherCode.pegs
+        
+        let backwardsExactMatches = pegs.indices.reversed().map { index in
+            if pegsToMatch.count > index, pegsToMatch[index] == pegs[index] {
+                pegsToMatch.remove(at: index)
+                return Match.exact
+            }
+            else {
+                return .nomatch
+            }
+        }
+        
+        let exactMatches = Array(backwardsExactMatches.reversed())
+        
+        return pegs.indices.map { index in
+            if exactMatches[index] != .exact, let matchIndex = pegsToMatch.firstIndex(of: pegs[index]) {
+                pegsToMatch.remove(at: matchIndex)
+                return Match.inexact
+            }
+            else {
+                return exactMatches[index]
+            }
+        }
+    }
+}
