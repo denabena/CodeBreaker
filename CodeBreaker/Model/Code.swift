@@ -27,7 +27,7 @@ struct Code {
         }
     }
     
-    init(kind: Kind = Kind.undefined, count: Int) {
+    init(kind: Kind = Kind.undefined, count: Int = 4) {
         self.kind = kind
         self.pegs = Array.init(repeating: Code.missingPeg, count: count)
     }

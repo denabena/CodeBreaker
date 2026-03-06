@@ -11,14 +11,40 @@ struct GameChooser: View {
     @State private var games: [CodeBreaker] = []
     
     var body: some View {
-        List (games, id: \.possibleOptions) { game in
-            PegChooser(pegChoices: game.possibleOptions)
+        NavigationStack {
+            List {
+                ForEach(games) { game in
+                    NavigationLink(value: game) {
+                        GameSummary(game: game)
+                    }
+                    NavigationLink(value: game.masterCode.pegs) {
+                        Text("Cheat")
+                    }
+                }
+                .onDelete { offsets in
+                    games.remove(atOffsets: offsets)
+                }
+                .onMove { offsets, destination in
+                    games.move(fromOffsets: offsets, toOffset: destination)
+                }
+            }
+            .navigationDestination(for: CodeBreaker.self) { game in
+                CodeBreakerView(game: game)
+            }
+            .navigationDestination(for: [Peg].self) { peg in
+                PegChooser(pegChoices: peg)
+            }
+            .listStyle(.plain)
+            .toolbar {
+                EditButton()
+            }
+
         }
-        onAppear {
+        .onAppear {
             if games.isEmpty {
-                games.append(CodeBreaker(possibleOptions: [.red, .blue, .green, .yellow]))
-                //games.append(CodeBreaker(possibleOptions: [.orange, .brown, .black, .yellow, .green]))
-                //games.append(CodeBreaker(possibleOptions: [.blue, .indigo, .cyan]))
+                games.append(CodeBreaker(name: "Mastermind", possibleOptions: [.red, .blue, .green, .yellow]))
+                games.append(CodeBreaker(name: "Earth Tones", possibleOptions: [.orange, .brown, .black, .yellow, .green]))
+                games.append(CodeBreaker(name : "Undersea", possibleOptions: [.blue, .indigo, .cyan]))
             }
         }
     }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CodeBreakerViewA2: View {
-    @State var game = CodeBreaker(possibleOptions: [.brown, .yellow, .black, .green, .blue], count: 4)
+    @State var game = CodeBreaker(possibleOptions: [.brown, .yellow, .black, .green, .blue])
     
     var body: some View {
         VStack {

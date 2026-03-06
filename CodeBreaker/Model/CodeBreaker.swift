@@ -9,7 +9,8 @@ import SwiftUI
 
 typealias Peg = Color
 
-struct CodeBreaker {
+@Observable class CodeBreaker {
+    var name: String
     var masterCode: Code
     var guessCode: Code
     var attempts: [Code] = []
@@ -18,7 +19,8 @@ struct CodeBreaker {
     var startTime: Date = Date.now
     var endTime: Date?
     
-    init(possibleOptions: [Peg] = [.green, .red, .yellow, .blue], count: Int = 4) {
+    init(name: String = "CodeBreaker", possibleOptions: [Peg] = [.green, .red, .yellow, .blue], count: Int = 4) {
+        self.name = name
         masterCode = Code (kind: .mastercode(isHidden: true), count: count)
         guessCode = Code (kind: .guesscode, count: count)
         self.possibleOptions = possibleOptions
@@ -31,7 +33,7 @@ struct CodeBreaker {
         attempts.first?.pegs == masterCode.pegs
     }
     
-    mutating func attemptGuess() {
+    func attemptGuess() {
         guard !attempts.contains(where: { $0.pegs == guessCode.pegs }) else { return }
         var attempt = guessCode
         attempt.kind = .attempt(guessCode.match(against: masterCode))
@@ -43,7 +45,7 @@ struct CodeBreaker {
         }
     }
     
-    mutating func changePeg(at index: Int) {
+    func changePeg(at index: Int) {
         let existingPeg = guessCode.pegs[index]
         if let indexOfExistingPegInPegChoices = possibleOptions.firstIndex(of: existingPeg) {
             guessCode.pegs[index] = possibleOptions[(indexOfExistingPegInPegChoices + 1) % possibleOptions.count]
@@ -54,11 +56,16 @@ struct CodeBreaker {
         
     }
     
-    mutating func restartGame() {
-        self = CodeBreaker(possibleOptions: possibleOptions, count: 4)
+    func restartGame() {
+        masterCode.kind = .mastercode(isHidden: true)
+        masterCode.randomize(from: possibleOptions)
+        guessCode.reset()
+        attempts.removeAll()
+        startTime = .now
+        endTime = nil
     }
     
-    mutating func setGuessPeg(_ peg: Peg, at index: Int) {
+    func setGuessPeg(_ peg: Peg, at index: Int) {
         guard guessCode.pegs.indices.contains(index) else { return }
         guessCode.pegs[index] = peg
     }
@@ -66,4 +73,14 @@ struct CodeBreaker {
 
 extension Peg {
     static let missing = Color.clear
+}
+
+extension CodeBreaker: Identifiable, Hashable {
+    static func == (lhs: CodeBreaker, rhs: CodeBreaker) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }

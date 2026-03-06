@@ -9,8 +9,10 @@ import SwiftUI
 
 struct CodeBreakerView: View {
     
+    //MARK: Data Shared With Me
+    let game: CodeBreaker
+    
     // MARK: Data Owned by Me
-    @State private var game = CodeBreaker(possibleOptions: [.brown, .yellow, .black, .green], count: 4)
     @State private var selection: Int = 0
     @State private var restarting: Bool = false
     @State private var hideMostRecentMarkers: Bool = false
@@ -18,13 +20,7 @@ struct CodeBreakerView: View {
     // MARK: - Body
     var body: some View {
         VStack {
-            Button("Restart", systemImage: "arrow.circlepath", action: restart)
-            CodeView(code: game.masterCode) {
-                ElapsedTime(startTime: game.startTime, endTime: game.endTime)
-                    .flexibleSystemFont()
-                    .monospaced(true)
-                    .lineLimit(1)
-            }
+            CodeView(code: game.masterCode)
             ScrollView {
                 if !game.isOver || restarting {
                     CodeView(code: game.guessCode, selection: $selection){
@@ -45,6 +41,17 @@ struct CodeBreakerView: View {
                     .transition(
                         .attempt(game.isOver)
                     )
+                }
+            }
+            .toolbar {
+                ToolbarItem (placement: .topBarTrailing) {
+                    Button("Restart", systemImage: "arrow.circlepath", action: restart)
+                }
+                ToolbarItem {
+                    ElapsedTime(startTime: game.startTime, endTime: game.endTime)
+                        .flexibleSystemFont()
+                        .monospaced(true)
+                        .lineLimit(1)
                 }
             }
             if !game.isOver {
@@ -87,5 +94,8 @@ struct CodeBreakerView: View {
 }
 
 #Preview {
-    CodeBreakerView()
+    @Previewable @State var game = CodeBreaker(name: "Preview", possibleOptions: [.red, .blue, .yellow, .green])
+    NavigationStack {
+        CodeBreakerView(game: game)
+    }
 }
